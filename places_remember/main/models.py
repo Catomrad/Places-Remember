@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 
 class Memory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    location = models.CharField(max_length=100)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
     title = models.CharField(max_length=100)
     description = models.TextField()
 

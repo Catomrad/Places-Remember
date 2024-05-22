@@ -1,8 +1,7 @@
-from django.shortcuts import render
-from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .forms import MemoryForm
 from .models import Memory
 
@@ -48,8 +47,13 @@ def add_memory(request):
         if form.is_valid():
             memory = form.save(commit=False)
             memory.user = request.user
-            memory.save()
-            return redirect('profile')
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+            if latitude is not None and longitude is not None:
+                memory.latitude = latitude
+                memory.longitude = longitude
+                memory.save()
+                return redirect('profile')
     else:
         form = MemoryForm()
     return render(request, 'add_memory.html', {'form': form})

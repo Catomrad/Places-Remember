@@ -2,13 +2,56 @@
 <html>
 <head>
     <title>Add Memory</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 50%;
+        }
+        section {
+            display: flex;
+        }
+    </style>
 </head>
 <body>
     <h2>Add Memory</h2>
-    <form method="post">
+    <section>
+    <div id="map"></div>
+    <form method="post" id="memoryForm">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Add Memory</button>
+        <input type="submit" value="Сохранить">
     </form>
+    </section>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRulCyhPSBC0HkXRYZnkzdHSGcHgH35Sw&callback=initMap">
+    </script>
+<script>
+    var map;
+    var marker;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 0, lng: 0},
+            zoom: 5
+        });
+
+        google.maps.event.addListener(map, 'click', function(event) {
+            placeMarker(event.latLng);
+        });
+    }
+
+    function placeMarker(location) {
+        if (marker) {
+            marker.setMap(null); // Удалить предыдущую метку с карты
+        }
+
+        marker = new google.maps.Marker({
+            position: location,
+            map: map
+        });
+
+        document.getElementById('id_latitude').value = location.lat();
+        document.getElementById('id_longitude').value = location.lng();
+    }
+</script>
 </body>
 </html>

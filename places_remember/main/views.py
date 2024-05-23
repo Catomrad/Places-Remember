@@ -71,12 +71,15 @@ def edit_memory(request, memory_id):
     if request.method == 'POST':
         form = MemoryForm(request.POST, instance=memory)
         if form.is_valid():
-            form.save()
+            # Сохранение значений формы в объект памяти
+            memory = form.save(commit=False)
+            memory.user = request.user  # Обновляем пользователя, на всякий случай
+            memory.save()
             return redirect('profile')
     else:
         form = MemoryForm(instance=memory)
 
-    return render(request, 'edit_memory.html', {'form': form})
+    return render(request, 'edit_memory.html', {'form': form, 'memory': memory})
 
 
 def delete_memory(request, memory_id):

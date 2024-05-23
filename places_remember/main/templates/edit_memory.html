@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Memory</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 800px;
+        }
+    </style>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=d37a6dd7-41f6-4599-9a66-01e1427c7219&lang=ru_RU" type="text/javascript"></script>
+    <script>
+        ymaps.ready(init);
+
+        function init() {
+            var latitude = parseFloat("{{ memory.latitude|floatformat:6|default_if_none:'0.0' }}".replace(",", "."));
+            var longitude = parseFloat("{{ memory.longitude|floatformat:6|default_if_none:'0.0' }}".replace(",", "."));
+            console.log("Latitude:", latitude);
+            console.log("Longitude:", longitude);
+
+            var mapCenter = [latitude, longitude];
+
+            var map = new ymaps.Map("map", {
+                center: mapCenter,
+                zoom: 10
+            });
+
+            var placemark = new ymaps.Placemark(mapCenter, {
+                hintContent: 'Ваше воспоминание',
+                balloonContent: 'Переместите метку для изменения местоположения'
+            }, {
+                draggable: true
+            });
+
+            map.geoObjects.add(placemark);
+
+            placemark.events.add('dragend', function (e) {
+                var coords = e.get('target').geometry.getCoordinates();
+                document.getElementById('id_latitude').value = coords[0];
+                document.getElementById('id_longitude').value = coords[1];
+                console.log("New coordinates:", coords);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>Edit Memory</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div id="map"></div>
+        <button type="submit">Save changes</button>
+    </form>
+    <a href="{% url 'profile' %}">Cancel</a>
+</body>
+</html>

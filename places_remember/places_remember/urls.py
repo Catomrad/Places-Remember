@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from main import views
 
 urlpatterns = [
@@ -25,4 +26,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('profile/', views.profile, name='profile'),
     path('add_memory/', views.add_memory, name='add_memory'),
+    path('edit_memory/<int:memory_id>/', views.edit_memory, name='edit_memory'),
+    path('delete_memory/<int:memory_id>/', views.delete_memory, name='delete_memory'),
+    path('', auth_views.LogoutView.as_view(), name='logout'),
 ]

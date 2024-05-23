@@ -1,70 +1,89 @@
 <html>
 <head>
+    {% load static %}
     <title>Profile</title>
     <style>
+        body{
+        text-align: center;
+        }
         #map {
+            margin: auto;
             height: 400px;
-            width: 800px;
+            width: 70%;
+        }
+        li{
+            list-style-type: none;
+            margin: 5px;
+        }
+        a{
+        text-decoration: none;
+        color: black;
+        font-size: 20px;
+        }
+        a:hover {
+        font-size: 24px;
+        color: blue;
         }
     </style>
 </head>
 <body>
-    <h2>Welcome, {{ request.user.username }}</h2>
-    <h3>Your Memories:</h3>
-    <ul>
-        {% for memory in memories %}
-            <li>{{ memory.title }} - {{ memory.description }}, {{ memory.latitude }}, {{ memory.longitude }}</li>
-        {% endfor %}
-    </ul>
+    <h2>Приветствую, {{ request.user.username }}</h2>
+    <a href="{% url 'logout' %}">Выйти</a>
+    <h3>Ваши воспоминания:</h3>
+    {% if memories %}
+        <ul>
+            {% for memory in memories %}
+                <li>
+                    <a href="{% url 'edit_memory' memory.id %}">{{ memory.title }} - {{ memory.description }}</a>
+                    <form method="POST" action="{% url 'delete_memory' memory.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У вас нет ни одного воспоминания.</p>
+    {% endif %}
     <a href="{% url 'add_memory' %}">Добавить воспоминание</a>
-
-    <h3>Your Memories Map:</h3>
+    <h3>Карта ваших воспоминаний:</h3>
     <div id="map" data-coordinates="{{ coordinates|safe }}"></div>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRulCyhPSBC0HkXRYZnkzdHSGcHgH35Sw&callback=initMap">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=d37a6dd7-41f6-4599-9a66-01e1427c7219&lang=ru"
+            type="text/javascript">
     </script>
     <script>
-            var map;
-    var markers = [];
-    var coordinates = [
-        // Вставьте здесь список координат широты и долготы
-        {% for memory in memories %}
-            [{{ memory.latitude }}, {{ memory.longitude }}],
-        {% endfor %}
-    ];
+    var mapElement = document.getElementById('map');
 
-    function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: 56.042639, lng: 92.838818},
-            zoom: 5
-        });
+        ymaps.ready(init);
 
-        for (var i = 0; i < coordinates.length; i++) {
-            var latLng = new google.maps.LatLng(coordinates[i][0], coordinates[i][1]);
-            var marker = new google.maps.Marker({
-                position: latLng,
-                map: map
-            });
-            markers.push(marker);
-        }
-    }
+            function init() {
+                var map = new ymaps.Map(mapElement, {
+                    center: [55.992177, 92.795343], // Замените на нужные координаты для центра карты
+                    zoom: 5
+                });
 
-    function placeMarker(location) {
-        clearMarkers();
-        var marker = new google.maps.Marker({
-            position: location,
-            map: map
-        });
-        markers.push(marker);
-    }
+                var coordinates = [
+                    {% for memory in memories %}
+                        {
+                            coords: [parseFloat("{{ memory.latitude|floatformat:6|default_if_none:'0.0' }}".replace(",", ".")),
+                            parseFloat("{{ memory.longitude|floatformat:6|default_if_none:'0.0' }}".replace(",", "."))],
+                            title: "{{ memory.title|escapejs }}",
+                            description: "{{ memory.description|escapejs }}"
+                        },
+                    {% endfor %}
+                ];
 
-    function clearMarkers() {
-        for (var i = 0; i < markers.length; i++) {
-            markers[i].setMap(null);
-        }
-        markers = [];
-    }
+                for (var i = 0; i < coordinates.length; i++) {
+                    var placemark = new ymaps.Placemark(coordinates[i].coords, {
+                        hintContent: coordinates[i].title,
+                        balloonContent: coordinates[i].description
+                    });
 
+                    map.geoObjects.add(placemark);
+                }
+            }
     </script>
+
 </body>
 </html>

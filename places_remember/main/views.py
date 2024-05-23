@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import MemoryForm
 from .models import Memory
@@ -57,3 +57,30 @@ def add_memory(request):
     else:
         form = MemoryForm()
     return render(request, 'add_memory.html', {'form': form})
+
+
+def edit_memory(request, memory_id):
+    memory = get_object_or_404(Memory, id=memory_id)
+    if request.method == 'POST':
+        form = MemoryForm(request.POST, instance=memory)
+        if form.is_valid():
+            memory.latitude = form.cleaned_data['latitude']
+            memory.longitude = form.cleaned_data['longitude']
+            form.save()
+            return redirect('profile')
+    else:
+        form = MemoryForm(instance=memory)
+
+    context = {
+        'form': form,
+        'memory': memory,
+    }
+    return render(request, 'edit_memory.html', context)
+
+
+def delete_memory(request, memory_id):
+    memory = get_object_or_404(Memory, id=memory_id)
+    if request.method == 'POST':
+        memory.delete()
+        return redirect('profile')
+    return redirect('profile')

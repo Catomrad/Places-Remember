@@ -22,36 +22,47 @@
         <input type="submit" value="Сохранить">
     </form>
     </section>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRulCyhPSBC0HkXRYZnkzdHSGcHgH35Sw&callback=initMap">
-    </script>
-<script>
-    var map;
-    var marker;
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=d37a6dd7-41f6-4599-9a66-01e1427c7219&lang=ru"
+            type="text/javascript"></script>
+    <script>
+        ymaps.ready(init);
 
-    function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: 0, lng: 0},
-            zoom: 5
-        });
+        function init() {
+            var map = new ymaps.Map("map", {
+                center: [55.992177, 92.795343], // Координаты центра карты
+                zoom: 10
+            });
 
-        google.maps.event.addListener(map, 'click', function(event) {
-            placeMarker(event.latLng);
-        });
-    }
+            var placemark;
 
-    function placeMarker(location) {
-        if (marker) {
-            marker.setMap(null); // Удалить предыдущую метку с карты
+            // Добавляем метку по клику на карту
+            map.events.add('click', function (e) {
+                var coords = e.get('coords');
+
+                if (placemark) {
+                    placemark.geometry.setCoordinates(coords);
+                } else {
+                    placemark = new ymaps.Placemark(coords, {
+                        hintContent: 'Ваше воспоминание',
+                        balloonContent: 'Вы выбрали это место для вашего воспоминания'
+                    }, {
+                        draggable: true
+                    });
+
+                    placemark.events.add('dragend', function () {
+                        var newCoords = placemark.geometry.getCoordinates();
+                        document.getElementById('id_latitude').value = newCoords[0];
+                        document.getElementById('id_longitude').value = newCoords[1];
+                    });
+
+                    map.geoObjects.add(placemark);
+                }
+
+                // Записываем координаты в скрытые поля формы
+                document.getElementById('id_latitude').value = coords[0];
+                document.getElementById('id_longitude').value = coords[1];
+            });
         }
-
-        marker = new google.maps.Marker({
-            position: location,
-            map: map
-        });
-
-        document.getElementById('id_latitude').value = location.lat();
-        document.getElementById('id_longitude').value = location.lng();
-    }
-</script>
+    </script>
 </body>
 </html>

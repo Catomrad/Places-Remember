@@ -45,13 +45,13 @@
     </script>
 </head>
 <body>
-    <h2>Edit Memory</h2>
+    <h2>Редактировать воспоминание</h2>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <div id="map"></div>
-        <button type="submit">Save changes</button>
+        <button type="submit">Сохранить</button>
     </form>
-    <a href="{% url 'profile' %}">Cancel</a>
+    <a href="{% url 'profile' %}">Отменить</a>
 </body>
 </html>

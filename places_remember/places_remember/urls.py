@@ -28,5 +28,5 @@ urlpatterns = [
     path('add_memory/', views.add_memory, name='add_memory'),
     path('edit_memory/<int:memory_id>/', views.edit_memory, name='edit_memory'),
     path('delete_memory/<int:memory_id>/', views.delete_memory, name='delete_memory'),
-    path('', auth_views.LogoutView.as_view(), name='logout'),
+    path('', auth_views.LogoutView.as_view(next_page='home'), name='logout')
 ]

@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from .forms import MemoryForm
 from .models import Memory
 
@@ -59,23 +60,23 @@ def add_memory(request):
     return render(request, 'add_memory.html', {'form': form})
 
 
+@login_required
 def edit_memory(request, memory_id):
     memory = get_object_or_404(Memory, id=memory_id)
+
+    # Проверка, является ли текущий пользователь владельцем воспоминания
+    if memory.user != request.user:
+        return HttpResponseForbidden("You are not allowed to edit this memory.")
+
     if request.method == 'POST':
         form = MemoryForm(request.POST, instance=memory)
         if form.is_valid():
-            memory.latitude = form.cleaned_data['latitude']
-            memory.longitude = form.cleaned_data['longitude']
             form.save()
             return redirect('profile')
     else:
         form = MemoryForm(instance=memory)
 
-    context = {
-        'form': form,
-        'memory': memory,
-    }
-    return render(request, 'edit_memory.html', context)
+    return render(request, 'edit_memory.html', {'form': form})
 
 
 def delete_memory(request, memory_id):

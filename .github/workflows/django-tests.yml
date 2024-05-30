@@ -26,5 +26,5 @@ jobs:
 
     - name: Run tests
       run: |
-        python Places-Remember/manage.py migrate
-        python Places-Remember/manage.py test
+        python places_remember/manage.py migrate
+        python places_remember/manage.py test

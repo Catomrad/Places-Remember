@@ -26,5 +26,6 @@ jobs:
 
     - name: Run tests
       run: |
+        cd D:\Important_files\Django-web-app\Places-Remember\places_remember\manage.py
         python manage.py migrate
         python manage.py test

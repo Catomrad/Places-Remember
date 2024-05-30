@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -26,8 +25,24 @@ SECRET_KEY = 'django-insecure-tg0v)*615_2$-8^ry=kucb1)b^(ns#c(we6%9&3yps*r8i3n32
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
+VK_SERVICE_TOKEN = '2882353128823531288235318c2b9a68e022882288235314ed498cf5cb5c0142de67ccb'
+
+ALLOWED_HOSTS = [
+    'localhost',
+    'localhost:80/',
+    '127.0.0.1',
+    'dc79-193-218-138-71.ngrok-free.app',  # Необходимо менять на новое значение при запуске ngrok
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://localhost:80',
+    'http://127.0.0.1:8000',
+    'https://dc79-193-218-138-71.ngrok-free.app',  # Необходимо менять на новое значение при запуске ngrok
+]
 
 # Application definition
 
@@ -38,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'main'
+    'main',
 ]
 
 MIDDLEWARE = [
@@ -71,7 +86,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'places_remember.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -81,7 +95,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -101,7 +114,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -112,7 +124,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -128,4 +139,5 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGOUT_REDIRECT_URL = 'home'
+VK_CLIENT_ID = '51928529'
+VK_CLIENT_SECRET = '3iwgs3wjgn9dhSzrIt7o'

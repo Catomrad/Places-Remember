@@ -1,19 +1,17 @@
+import unittest
 from django.test import TestCase, Client
-from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Memory
-
-
-# Create your tests here.
+import uuid
+from django.http import HttpRequest
+from django.urls import reverse
+from .models import Memory, User
+from .views import add_memory, profile
 
 
 class MemoryCreationTests(TestCase):
     def setUp(self):
         # Создаем тестового пользователя
-        self.user = User.objects.create_user(username='testuser', password='12345')
-        self.client = Client()
-        self.client.login(username='testuser', password='12345')
-        self.create_memory_url = reverse('add_memory')
+        self.user = User.objects.create(vk_id=str(uuid.uuid4()), first_name='Test', last_name='User')
 
     def test_create_memory(self):
         # Данные для нового воспоминания
@@ -24,11 +22,18 @@ class MemoryCreationTests(TestCase):
             'longitude': 37.6173
         }
 
-        response = self.client.post(self.create_memory_url, data=memory_data)
+        # Создаем фиктивный запрос с данными формы
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST = memory_data
+        request.session = {'user_id': self.user.id}
+
+        # Вызываем представление напрямую
+        response = add_memory(request)
 
         # Проверяем, что редирект произошел успешно
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('profile'))
+        self.assertEqual(response['Location'], reverse('profile'))
 
         # Проверяем, что воспоминание создано в базе данных
         self.assertEqual(Memory.objects.count(), 1)
@@ -43,28 +48,32 @@ class MemoryCreationTests(TestCase):
 class MemoryListTests(TestCase):
     def setUp(self):
         # Создаем тестового пользователя
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = User.objects.create(vk_id=str(uuid.uuid4()), first_name='Test', last_name='User')
         self.client = Client()
-        self.client.login(username='testuser', password='12345')
-        self.profile_url = reverse('profile')
+
+        # Аутентифицируем пользователя, добавляя user_id в сессию
+        session = self.client.session
+        session['user_id'] = self.user.id
+        session.save()
 
         # Создаем несколько воспоминаний для тестового пользователя
-        Memory.objects.create(user=self.user, title='Memory 1', description='Description 1', latitude=55.7558,
-                              longitude=37.6173)
-        Memory.objects.create(user=self.user, title='Memory 2', description='Description 2', latitude=48.8566,
-                              longitude=2.3522)
+        Memory.objects.create(user=self.user, title='Memory 1', description='Description 1', latitude=55.7558, longitude=37.6173)
+        Memory.objects.create(user=self.user, title='Memory 2', description='Description 2', latitude=48.8566, longitude=2.3522)
 
     def test_memory_list(self):
-        response = self.client.get(self.profile_url)
+        response = self.client.get(reverse('profile'))
 
         # Проверяем, что запрос выполнен успешно
         self.assertEqual(response.status_code, 200)
 
+        # Извлекаем контекст из ответа
+        context = response.context
+
         # Проверяем, что воспоминания передаются в контексте
-        self.assertIn('memories', response.context)
+        self.assertIn('memories', context)
 
         # Проверяем, что количество воспоминаний в контексте соответствует количеству в базе данных
-        memories = response.context['memories']
+        memories = context['memories']
         self.assertEqual(len(memories), 2)
 
         # Проверяем данные первых воспоминаний
@@ -77,3 +86,7 @@ class MemoryListTests(TestCase):
         self.assertEqual(memories[1].description, 'Description 2')
         self.assertEqual(memories[1].latitude, 48.8566)
         self.assertEqual(memories[1].longitude, 2.3522)
+
+
+if __name__ == '__main__':
+    unittest.main()

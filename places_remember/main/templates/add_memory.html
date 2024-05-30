@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/add_memory.css'%}" type="text/css">
     <title>Добавить воспоминание</title>
-    <style>
-        #map {
-            height: 400px;
-            width: 50%;
-        }
-        section {
-            display: flex;
-        }
-    </style>
 </head>
 <body>
-    <h2>Добавить воспоминание</h2>
-    <section>
-    <div id="map"></div>
-    <form method="post" id="memoryForm">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Сохранить">
-    </form>
-    </section>
+    <header>
+        <h1>Добавить воспоминание</h1>
+    </header>
+    <main>
+        <section>
+            <div id="map"></div>
+            <form method="post" id="memoryForm">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Сохранить">
+            </form>
+        </section>
+    </main>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=d37a6dd7-41f6-4599-9a66-01e1427c7219&lang=ru"
             type="text/javascript"></script>
     <script>

@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/edit_memory.css'%}" type="text/css">
     <meta charset="UTF-8">
     <title>Edit Memory</title>
-    <style>
-        #map {
-            height: 400px;
-            width: 800px;
-        }
-    </style>
 </head>
 <body>
-    <h2>Редактировать воспоминание</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div id="map"></div>
-        <button type="submit">Сохранить</button>
-    </form>
-    <a href="{% url 'profile' %}">Отменить</a>
+    <header>
+        <h1>Редактировать воспоминание</h1>
+    </header>
+    <main>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div id="map" data-lat="{{ memory.latitude }}" data-lng="{{ memory.longitude }}"></div>
+            <button type="submit">Сохранить</button>
+            <a href="{% url 'profile' %}" class="cancel">Отменить</a>
+        </form>
+    </main>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=d37a6dd7-41f6-4599-9a66-01e1427c7219&lang=ru_RU" type="text/javascript"></script>
     <script>
         ymaps.ready(init);

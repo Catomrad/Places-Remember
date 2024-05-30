@@ -22,11 +22,10 @@ from main import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
-    path('register/', views.register, name='register'),
-    path('login/', views.login, name='login'),
     path('profile/', views.profile, name='profile'),
+    path('logout/', views.logout_view, name='logout'),
     path('add_memory/', views.add_memory, name='add_memory'),
     path('edit_memory/<int:memory_id>/', views.edit_memory, name='edit_memory'),
     path('delete_memory/<int:memory_id>/', views.delete_memory, name='delete_memory'),
-    path('', auth_views.LogoutView.as_view(next_page='home'), name='logout')
+    path('exchange_silent_token/', views.exchange_silent_token, name='exchange_silent_token'),
 ]

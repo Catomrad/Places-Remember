@@ -1,13 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
+    {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/home.css'%}" type="text/css">
+    <script
+      type="text/javascript"
+      src="https://vk.com/js/api/openapi.js?168"
+      charset="windows-1251"
+    ></script>
+    <script type="text/javascript" src="https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js">
+    </script>
     <title>Home</title>
 </head>
+{% load static %}
 <body>
+<header>
     <h1>Добро пожаловать в Places Remember</h1>
-    <a href="{% url 'login' %}">Войти</a> |
-    <a href="{% url 'register' %}">Регистрация</a>
+</header>
+    <main>
+        {% csrf_token %}
+        <p>
+            Places Remember - это платформа, которая позволяет вам сохранять воспоминания
+            о ваших любимых местах. Авторизуйтесь через ВКонтакте, чтобы получить доступ
+            к вашему профилю и добавлять воспоминания о местах, которые имеют особое значение для вас.
+            Просматривайте ваши воспоминания на интерактивной карте.
+        </p>
+        <div id="VkIdSdkOneTap"></div>
+    </main>
+    <script>
+VK.init({
+    apiId: 51928529
+});
+const VKID = window.VKIDSDK;
+
+VKID.Config.set({
+  app: '51928529', // Идентификатор приложения.
+  redirectUrl: 'https://dc79-193-218-138-71.ngrok-free.app', // Необходимо менять на новое значение при запуске ngrok
+  state: 'dj29fnsadjsd82...'
+});
+
+// Создание экземпляра кнопки.
+const oneTap = new VKID.OneTap();
+
+// Получение контейнера из разметки.
+const container = document.getElementById('VkIdSdkOneTap');
+
+// Проверка наличия кнопки в разметке.
+if (container) {
+  // Отрисовка кнопки в контейнере с именем приложения APP_NAME, светлой темой и на русском языке.
+  oneTap.render({ container: container,
+  scheme: VKID.Scheme.LIGHT,
+  lang: VKID.Languages.RUS });
+}
+var paramsString = document.location.search;
+var searchParams = new URLSearchParams(paramsString);
+
+var payload = searchParams.get("payload");
+if (payload) {
+    // Парсинг строки JSON
+    const parsedPayload = JSON.parse(decodeURIComponent(payload));
+
+    // Отправка silentToken на сервер для обмена на access_token
+    exchangeSilentToken(parsedPayload.token, parsedPayload.uuid)
+        .then(data => {
+            // Успешно обменяли токен, перенаправляем на страницу профиля
+            window.location.href = '/profile/';
+        })
+        .catch(error => {
+            console.error('Token exchange failed:', error);
+        });
+
+// Функция для обмена silent_token на access_token через сервер
+function exchangeSilentToken(silentToken, uuid) {
+    return fetch('/exchange_silent_token/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Django CSRF токен
+        },
+        body: JSON.stringify({
+            silent_token: silentToken,
+            uuid: uuid
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Response from server:', data);
+        if (data.error) {
+            throw new Error(`Error: ${data.error.error_msg}`);
+        }
+        // Сохраняем access_token и информацию о пользователе в localStorage
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_info', JSON.stringify(data.response));
+        return data;
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        throw error;
+    });
+}}
+    </script>
 </body>
 </html>
